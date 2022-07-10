@@ -37,7 +37,7 @@ const UserProfiles = () => {
 
 function Dropzone({ userProfileId }) {
 
-  const onDrop = useCallback(acceptedFiles => {
+  const onDrop = useCallback((acceptedFiles) => {
 
     const file = acceptedFiles[0];
 

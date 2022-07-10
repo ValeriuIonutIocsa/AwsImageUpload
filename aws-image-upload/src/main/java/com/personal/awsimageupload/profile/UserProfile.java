@@ -6,8 +6,8 @@ import java.util.UUID;
 
 public class UserProfile {
 
-	private UUID userProfileId;
-	private String username;
+	private final UUID userProfileId;
+	private final String username;
 	private String userProfileImageLink; // S3 key
 
 	public UserProfile(
@@ -45,18 +45,8 @@ public class UserProfile {
 		return userProfileId;
 	}
 
-	public void setUserProfileId(
-            final UUID userProfileId) {
-		this.userProfileId = userProfileId;
-	}
-
 	public String getUsername() {
 		return username;
-	}
-
-	public void setUsername(
-            final String username) {
-		this.username = username;
 	}
 
 	public Optional<String> getUserProfileImageLink() {
@@ -64,7 +54,7 @@ public class UserProfile {
 	}
 
 	public void setUserProfileImageLink(
-            final String userProfileImageLink) {
+			final String userProfileImageLink) {
 		this.userProfileImageLink = userProfileImageLink;
 	}
 }
