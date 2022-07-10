@@ -55,6 +55,41 @@ public class UserProfileService {
 		}
 
 		// 3. Check if the user exists is our database
+		final UserProfile userProfile = tryComputeUserProfile(userProfileId);
+
+		// 4. Grab some metadata from file if any
+		final long contentLength = file.getSize();
+		final Map<String, String> metadataMap = new HashMap<>();
+		metadataMap.put("Content-Type", contentType);
+		metadataMap.put("Content-Length", String.valueOf(contentLength));
+
+		// 5. Store the image in s3 and update database (userProfileDataAccessService) with s3 image link
+		final String path = BucketName.PROFILE_IMAGE.getBucketName() + "/" + userProfileId;
+		final String fileName = "file-" + userProfileId;
+		try {
+			fileStore.save(path, fileName, contentLength, metadataMap, file.getInputStream());
+			userProfile.setUserProfileImageLink(fileName);
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	byte[] downloadUserProfileImage(
+			final UUID userProfileId) {
+
+		final UserProfile userProfile = tryComputeUserProfile(userProfileId);
+		final String bucketName = BucketName.PROFILE_IMAGE.getBucketName();
+		final String path = bucketName + "/" + userProfileId;
+
+		final Optional<String> userProfileImageLink = userProfile.getUserProfileImageLink();
+		return userProfileImageLink
+				.map(key -> fileStore.download(path, key))
+				.orElse(new byte[0]);
+	}
+
+	private UserProfile tryComputeUserProfile(
+			final UUID userProfileId) {
+
 		UserProfile userProfile = null;
 		final List<UserProfile> userProfiles = userProfileDataAccessService.getUserProfiles();
 		for (final UserProfile aUserProfile : userProfiles) {
@@ -67,23 +102,8 @@ public class UserProfileService {
 			}
 		}
 		if (userProfile == null) {
-			throw new IllegalStateException(
-					String.format("User profile %s not found", userProfileId));
+			throw new IllegalStateException("User profile " + userProfileId + " not found");
 		}
-
-		// 4. Grab some metadata from file if any
-		final Map<String, String> metadata = new HashMap<>();
-		metadata.put("Content-Type", contentType);
-		metadata.put("Content-Length", String.valueOf(file.getSize()));
-
-		// 5. Store the image in s3 and update database (userProfileDataAccessService) with s3 image link
-		final String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), userProfileId);
-		final String fileName = String.format("%s-%s", file.getOriginalFilename(), userProfileId);
-		try {
-			fileStore.save(path, fileName, Optional.of(metadata), file.getInputStream());
-            userProfile.setUserProfileImageLink(fileName);
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		}
+		return userProfile;
 	}
 }

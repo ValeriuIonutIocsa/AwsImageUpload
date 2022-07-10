@@ -9,18 +9,22 @@ import org.springframework.stereotype.Repository;
 import com.personal.awsimageupload.profile.UserProfile;
 
 @Repository
-public class FakeUserProfileDataStore {
+public class FakeUserProfileDataStore implements UserProfileDataStore {
 
 	private static final List<UserProfile> USER_PROFILES = new ArrayList<>();
 
 	static {
+		final UUID userProfileId = UUID.fromString("8197f253-f969-499e-8a59-8ec3a7926cf1");
 		USER_PROFILES.add(new UserProfile(
-                UUID.fromString("8197f253-f969-499e-8a59-8ec3a7926cf1"), "jannetjones", null));
+				userProfileId, "jannetjones", "file-" + userProfileId));
+
+		final UUID userProfileId2 = UUID.fromString("be9407a6-7bf7-4da3-8b98-3968505a7d43");
 		USER_PROFILES.add(new UserProfile(
-                UUID.fromString("be9407a6-7bf7-4da3-8b98-3968505a7d43"), "antoniojunior", null));
+				userProfileId2, "antoniojunior", "file-" + userProfileId2));
 	}
 
-	public static List<UserProfile> getUserProfiles() {
+	@Override
+	public List<UserProfile> getUserProfiles() {
 		return USER_PROFILES;
 	}
 }

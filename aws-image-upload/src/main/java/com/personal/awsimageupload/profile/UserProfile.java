@@ -45,10 +45,6 @@ public class UserProfile {
 		return userProfileId;
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
 	public Optional<String> getUserProfileImageLink() {
 		return Optional.ofNullable(userProfileImageLink);
 	}
